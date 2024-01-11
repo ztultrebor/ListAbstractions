@@ -15,8 +15,20 @@
     [else (cons (f (first lst)) (map-2 f (rest lst)))]))
 
 
+(define (andmap-2 pred lst)
+  ; [X -> Boolean] [ListOf X] -> Boolean
+  (or
+   (empty? lst)
+   (and
+    (pred (first lst))
+    (andmap-2 pred (rest lst)))))
+
+
 
 ; =====================
 ; checks
 (define lst '(0 1 2 3 4 5 6 7 8 9))
+(define gre0? (lambda (x) (>= x 0)))
 (check-expect (map-2 sqr lst) (map sqr lst))
+(check-expect (andmap-2 even? lst) (andmap even? lst))
+(check-expect (andmap-2 gre0? lst) (andmap gre0? lst))
