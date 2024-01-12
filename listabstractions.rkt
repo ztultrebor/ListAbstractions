@@ -16,9 +16,24 @@
     [else (cons (f (first lst)) (map-2 f (rest lst)))]))
 
 
+(define (map-3 f lst1 lst2)
+  ; [X Y -> Z] [ListOf X] [ListOf Y] -> [ListOf Z]
+  ; inner workings of map abstraction for 2 lists simutaneously
+  (local (
+          (define (map l1 l2)
+          (cond
+            [(empty? l1) '()]
+            [else
+             (cons (f (first l1) (first l2)) (map (rest l1) (rest l2)))])))
+    ; - IN -
+    (if (not (= (length lst1) (length lst2)))
+        (error "all lists must have same size")
+        (map lst1 lst2))))
+
+
 (define (andmap-2 pred lst)
   ; [X -> Boolean] [ListOf X] -> Boolean
-  ; inner workings of andmap function
+  ; inner workings of andmap abstraction
   (or
    (empty? lst)
    (and
@@ -28,7 +43,7 @@
 
 (define (ormap-2 pred lst)
   ; [X -> Boolean] [ListOf X] -> Boolean
-  ; inner workings of ormap function
+  ; inner workings of ormap abstraction
   (and
    (not (empty? lst))
    (or
@@ -36,14 +51,28 @@
     (ormap-2 pred (rest lst)))))
 
 
+(define (filter-2 pred lst)
+  ; [X -> Boolean] [ListOf X] -> [ListOf X]
+  ; inner workings of filter abstraction
+  (cond
+    [(empty? lst) '()]
+    [(pred (first lst)) (cons (first lst) (filter-2 pred (rest lst)))]
+    [else (filter-2 pred (rest lst))]))
+  
 
 ; =====================
 ; checks
 (define lst '(0 1 2 3 4 5 6 7 8 9))
+(define lst2 '(0 1 2 3 4 5 6 7 8 9 0))
 (define gre0? (lambda (x) (>= x 0)))
 (define l0? (lambda (x) (< x 0)))
 (check-expect (map-2 sqr lst) (map sqr lst))
+(check-expect (map-3 expt lst lst)(map expt lst lst))
+(check-error (map-3 expt lst lst2) "all lists must have same size")
 (check-expect (andmap-2 even? lst) (andmap even? lst))
 (check-expect (andmap-2 gre0? lst) (andmap gre0? lst))
 (check-expect (ormap-2 even? lst) (ormap even? lst))
 (check-expect (ormap-2 l0? lst) (ormap l0? lst))
+(check-expect (filter-2 even? lst) (filter even? lst))
+(check-expect (filter-2 l0? lst) (filter l0? lst))
+
