@@ -92,13 +92,39 @@
     [else (filter-2 pred (rest lst))]))
   
 
+(define (foldr-2 f default lst)
+  ; [X Y -> Y] Y -> Y
+  ; inner workings of foldr abstraction
+  (cond
+    [(empty? lst) default]
+    [else (f (first lst) (foldr-2 f default (rest lst)))]))
+
+
+(define (foldr-3 f default lst1 lst2)
+  ; [X Y Z -> Z] [ListOf X] [ListOf Y] -> Z
+  ; inner workings of foldr abstraction for 2 lists simultaneously
+  (local (
+          (define (foldr l1 l2)
+            (cond
+              [(empty? l1) default]
+              [else (f (first l1) (first l2) (foldr (rest l1) (rest l2)))])))
+    ; - IN -
+    (if (not (= (length lst1) (length lst2)))
+        (error "all lists must have same size")
+        (foldr lst1 lst2))))
+
+
+
 ; =====================
 ; checks
 (define lst '(0 1 2 3 4 5 6 7 8 9))
 (define lst2 '(0 1 2 3 4 5 6 7 8 9 0))
 (define lst3 '(1 2 3 4 5 6 7 8 9 0))
+(define lst4 '("" "." ".." "..." "...." "....."))
 (define gre0? (lambda (x) (>= x 0)))
 (define l0? (lambda (x) (< x 0)))
+(define dots (lambda (x y) (+ (string-length x) y)))
+(define max+ (lambda (x y z) (+ (if (> x y) x y) z)))
 (check-expect (map-2 sqr lst) (map sqr lst))
 (check-expect (map-3 expt lst lst)(map expt lst lst))
 (check-error (map-3 expt lst lst2) "all lists must have same size")
@@ -112,3 +138,6 @@
 (check-error (ormap-3 < lst lst2) "all lists must have same size")
 (check-expect (filter-2 even? lst) (filter even? lst))
 (check-expect (filter-2 l0? lst) (filter l0? lst))
+(check-expect (foldr-2 dots 0 lst4) (foldr dots 0 lst4))
+(check-expect (foldr-3 max+ 0 lst lst3) (foldr max+ 0 lst lst3))
+(check-error (foldr-3 max+ 0 lst lst2) "all lists must have same size")
