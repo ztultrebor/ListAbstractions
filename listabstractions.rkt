@@ -19,8 +19,7 @@
 (define (map-3 f lst1 lst2)
   ; [X Y -> Z] [ListOf X] [ListOf Y] -> [ListOf Z]
   ; inner workings of map abstraction for 2 lists simultaneously
-  (local (
-          (define (map l1 l2)
+  (local ((define (map l1 l2)
             (cond
               [(empty? l1) '()]
               [else
@@ -44,8 +43,7 @@
 (define (andmap-3 pred lst1 lst2)
   ; [X Y -> Boolean] [ListOf X] [ListOf Y] -> Boolean
   ; inner workings of andmap abstraction for 2 lists simultaneously
-  (local (
-          (define (andmap l1 l2)
+  (local ((define (andmap l1 l2)
             (or
              (empty? l1)
              (and
@@ -70,8 +68,7 @@
 (define (ormap-3 pred lst1 lst2)
   ; [X Y -> Boolean] [ListOf X] [ListOf Y] -> Boolean
   ; inner workings of ormap abstraction for 2 lists simultaneously
-  (local (
-          (define (ormap l1 l2)
+  (local ((define (ormap l1 l2)
             (and
              (not (empty? l1))
              (or
@@ -103,8 +100,7 @@
 (define (foldr-3 f default lst1 lst2)
   ; [X Y Z -> Z] [ListOf X] [ListOf Y] -> Z
   ; inner workings of foldr abstraction for 2 lists simultaneously
-  (local (
-          (define (foldr l1 l2)
+  (local ((define (foldr l1 l2)
             (cond
               [(empty? l1) default]
               [else (f (first l1) (first l2) (foldr (rest l1) (rest l2)))])))
@@ -113,6 +109,30 @@
         (error "all lists must have same size")
         (foldr lst1 lst2))))
 
+
+(define (foldl-2 f default lst)
+  ; [X Y -> Y] Y -> Y
+  ; inner workings of foldl abstraction
+  (local ((define (foldl lst acc)
+            (cond
+              [(empty? lst) acc]
+              [else (foldl (rest lst) (f (first lst) acc))])))
+    ; - IN -
+    (foldl lst default)))
+
+
+(define (foldl-3 f default lst1 lst2)
+  ; [X Y Z -> Z] [ListOf X] [ListOf Y] -> Z
+  ; inner workings of foldl abstraction for 2 lists simultaneously
+  (local ((define (foldl l1 l2 acc)
+            (cond
+              [(empty? l1) acc]
+              [else
+               (foldl (rest l1) (rest l2) (f (first l1) (first l2) acc))])))
+    ; - IN -
+    (if (not (= (length lst1) (length lst2)))
+        (error "all lists must have same size")
+        (foldl lst1 lst2 default))))
 
 
 ; =====================
@@ -141,3 +161,6 @@
 (check-expect (foldr-2 dots 0 lst4) (foldr dots 0 lst4))
 (check-expect (foldr-3 max+ 0 lst lst3) (foldr max+ 0 lst lst3))
 (check-error (foldr-3 max+ 0 lst lst2) "all lists must have same size")
+(check-expect (foldl-2 dots 0 lst4) (foldl dots 0 lst4))
+(check-expect (foldl-3 max+ 0 lst lst3) (foldl max+ 0 lst lst3))
+(check-error (foldl-3 max+ 0 lst lst2) "all lists must have same size")
